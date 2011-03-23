@@ -12,6 +12,8 @@
     <EntitySet Name="SideDishes" EntityType="FastFoodModels.Store.SideDishes" store:Type="Tables" Schema="dbo" />
     <EntitySet Name="SubOrderTemplates" EntityType="FastFoodModels.Store.SubOrderTemplates" store:Type="Tables" Schema="dbo" />
     <EntitySet Name="Dishes" EntityType="FastFoodModels.Store.Dishes" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="OrderedDishes" EntityType="FastFoodModels.Store.OrderedDishes" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="DishUnits" EntityType="FastFoodModels.Store.DishUnits" store:Type="Tables" Schema="dbo" />
     <AssociationSet Name="OrderSubOrder" Association="FastFoodModels.Store.OrderSubOrder">
       <End Role="Order" EntitySet="Orders" />
       <End Role="SubOrder" EntitySet="SubOrders" />
@@ -28,9 +30,21 @@
       <End Role="Customer" EntitySet="Customers" />
       <End Role="SubOrderTemplate" EntitySet="SubOrderTemplates" />
     </AssociationSet>
-    <AssociationSet Name="SubOrderDish" Association="FastFoodModels.Store.SubOrderDish">
-      <End Role="SubOrder" EntitySet="SubOrders" />
+    <AssociationSet Name="OrderedDishDish" Association="FastFoodModels.Store.OrderedDishDish">
+      <End Role="OrderedDish" EntitySet="OrderedDishes" />
       <End Role="Dish" EntitySet="Dishes" />
+    </AssociationSet>
+    <AssociationSet Name="SubOrderOrderedDish" Association="FastFoodModels.Store.SubOrderOrderedDish">
+      <End Role="SubOrder" EntitySet="SubOrders" />
+      <End Role="OrderedDish" EntitySet="OrderedDishes" />
+    </AssociationSet>
+    <AssociationSet Name="DishUnitDish" Association="FastFoodModels.Store.DishUnitDish">
+      <End Role="DishUnit" EntitySet="DishUnits" />
+      <End Role="Dish" EntitySet="Dishes" />
+    </AssociationSet>
+    <AssociationSet Name="OrderedDishDishUnit" Association="FastFoodModels.Store.OrderedDishDishUnit">
+      <End Role="OrderedDish" EntitySet="OrderedDishes" />
+      <End Role="DishUnit" EntitySet="DishUnits" />
     </AssociationSet>
   </EntityContainer>
   <EntityType Name="Orders">
@@ -78,7 +92,28 @@
       <PropertyRef Name="ID" />
     </Key>
     <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-    <Property Name="SubOrderDish_Dish_ID" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="OrderedDishes">
+    <Key>
+      <PropertyRef Name="ID" />
+    </Key>
+    <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="SubOrderID" Type="int" Nullable="false" />
+    <Property Name="PreOrderAmount" Type="int" Nullable="false" />
+    <Property Name="ActualOrderAmount" Type="int" Nullable="false" />
+    <Property Name="DeliveryAmount" Type="int" Nullable="false" />
+    <Property Name="DeliveriedAmount" Type="nvarchar" Nullable="false" />
+    <Property Name="AccountingDeliveriedAmount" Type="nvarchar" Nullable="false" />
+    <Property Name="OrderedDishDish_OrderedDish_ID" Type="int" Nullable="false" />
+    <Property Name="DishUnit_ID" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="DishUnits">
+    <Key>
+      <PropertyRef Name="ID" />
+    </Key>
+    <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Unit" Type="nvarchar" Nullable="false" />
+    <Property Name="Dish_ID" Type="int" Nullable="false" />
   </EntityType>
   <Association Name="OrderSubOrder">
     <End Role="Order" Type="FastFoodModels.Store.Orders" Multiplicity="1" />
@@ -128,15 +163,51 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
-  <Association Name="SubOrderDish">
+  <Association Name="OrderedDishDish">
+    <End Role="OrderedDish" Type="FastFoodModels.Store.OrderedDishes" Multiplicity="*" />
+    <End Role="Dish" Type="FastFoodModels.Store.Dishes" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="Dish">
+        <PropertyRef Name="ID" />
+      </Principal>
+      <Dependent Role="OrderedDish">
+        <PropertyRef Name="OrderedDishDish_OrderedDish_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="SubOrderOrderedDish">
     <End Role="SubOrder" Type="FastFoodModels.Store.SubOrders" Multiplicity="1" />
-    <End Role="Dish" Type="FastFoodModels.Store.Dishes" Multiplicity="*" />
+    <End Role="OrderedDish" Type="FastFoodModels.Store.OrderedDishes" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="SubOrder">
         <PropertyRef Name="ID" />
       </Principal>
-      <Dependent Role="Dish">
-        <PropertyRef Name="SubOrderDish_Dish_ID" />
+      <Dependent Role="OrderedDish">
+        <PropertyRef Name="SubOrderID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="DishUnitDish">
+    <End Role="DishUnit" Type="FastFoodModels.Store.DishUnits" Multiplicity="*" />
+    <End Role="Dish" Type="FastFoodModels.Store.Dishes" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="Dish">
+        <PropertyRef Name="ID" />
+      </Principal>
+      <Dependent Role="DishUnit">
+        <PropertyRef Name="Dish_ID" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="OrderedDishDishUnit">
+    <End Role="OrderedDish" Type="FastFoodModels.Store.OrderedDishes" Multiplicity="*" />
+    <End Role="DishUnit" Type="FastFoodModels.Store.DishUnits" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="DishUnit">
+        <PropertyRef Name="ID" />
+      </Principal>
+      <Dependent Role="OrderedDish">
+        <PropertyRef Name="DishUnit_ID" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
@@ -167,10 +238,16 @@
             <End Role="SubOrderTemplate" EntitySet="SubOrderTemplates" />
           </AssociationSet>
           <EntitySet Name="Dishes" EntityType="FastFoodModels.Dish" />
-          <AssociationSet Name="SubOrderDish" Association="FastFoodModels.SubOrderDish">
-            <End Role="SubOrder" EntitySet="SubOrders" />
+          <EntitySet Name="OrderedDishes" EntityType="FastFoodModels.OrderedDish" />
+          <AssociationSet Name="OrderedDishDish" Association="FastFoodModels.OrderedDishDish">
+            <End Role="OrderedDish" EntitySet="OrderedDishes" />
             <End Role="Dish" EntitySet="Dishes" />
           </AssociationSet>
+          <AssociationSet Name="SubOrderOrderedDish" Association="FastFoodModels.SubOrderOrderedDish">
+            <End Role="SubOrder" EntitySet="SubOrders" />
+            <End Role="OrderedDish" EntitySet="OrderedDishes" />
+          </AssociationSet>
+          <EntitySet Name="DishUnits" EntityType="FastFoodModels.DishUnit" />
         </EntityContainer>
         <EntityType Name="Order">
           <Documentation>
@@ -197,7 +274,7 @@
           <Property Type="Int32" Name="OrderID" Nullable="false" />
           <Property Type="String" Name="Recipient" Nullable="false" />
           <Property Type="String" Name="RecipientAddress" Nullable="false" />
-          <NavigationProperty Name="Dishes" Relationship="FastFoodModels.SubOrderDish" FromRole="SubOrder" ToRole="Dish" />
+          <NavigationProperty Name="OrderedDishes" Relationship="FastFoodModels.SubOrderOrderedDish" FromRole="SubOrder" ToRole="OrderedDish" />
         </EntityType>
         <Association Name="OrderSubOrder">
           <End Type="FastFoodModels.Order" Role="Order" Multiplicity="1" />
@@ -275,10 +352,48 @@
           </Key>
           <Property Type="Int32" Name="ID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
         </EntityType>
-        <Association Name="SubOrderDish">
-          <End Type="FastFoodModels.SubOrder" Role="SubOrder" Multiplicity="1" />
-          <End Type="FastFoodModels.Dish" Role="Dish" Multiplicity="*" />
+        <EntityType Name="OrderedDish">
+          <Documentation>
+            <Summary>分单中所定菜式及数量</Summary>
+          </Documentation>
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Type="Int32" Name="ID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="SubOrder" Relationship="FastFoodModels.SubOrderOrderedDish" FromRole="OrderedDish" ToRole="SubOrder" />
+          <Property Type="Int32" Name="SubOrderID" Nullable="false" />
+          <Property Type="Int32" Name="PreOrderAmount" Nullable="false" />
+          <Property Type="Int32" Name="ActualOrderAmount" Nullable="false" />
+          <Property Type="Int32" Name="DeliveryAmount" Nullable="false" />
+          <Property Type="String" Name="DeliveriedAmount" Nullable="false" />
+          <Property Type="String" Name="AccountingDeliveriedAmount" Nullable="false" />
+        </EntityType>
+        <Association Name="OrderedDishDish">
+          <End Type="FastFoodModels.OrderedDish" Role="OrderedDish" Multiplicity="1" />
+          <End Type="FastFoodModels.Dish" Role="Dish" Multiplicity="1" />
         </Association>
+        <Association Name="SubOrderOrderedDish">
+          <End Type="FastFoodModels.SubOrder" Role="SubOrder" Multiplicity="1" />
+          <End Type="FastFoodModels.OrderedDish" Role="OrderedDish" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SubOrder">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="OrderedDish">
+              <PropertyRef Name="SubOrderID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="DishUnit">
+          <Documentation>
+            <Summary>每种菜式的不同计量单位</Summary>
+          </Documentation>
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Type="Int32" Name="ID" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="Unit" Nullable="false" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -335,6 +450,27 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
+    <EntitySetMapping Name="OrderedDishes">
+      <EntityTypeMapping TypeName="IsTypeOf(FastFoodModels.OrderedDish)">
+        <MappingFragment StoreEntitySet="OrderedDishes">
+          <ScalarProperty Name="ID" ColumnName="ID" />
+          <ScalarProperty Name="SubOrderID" ColumnName="SubOrderID" />
+          <ScalarProperty Name="PreOrderAmount" ColumnName="PreOrderAmount" />
+          <ScalarProperty Name="ActualOrderAmount" ColumnName="ActualOrderAmount" />
+          <ScalarProperty Name="DeliveryAmount" ColumnName="DeliveryAmount" />
+          <ScalarProperty Name="DeliveriedAmount" ColumnName="DeliveriedAmount" />
+          <ScalarProperty Name="AccountingDeliveriedAmount" ColumnName="AccountingDeliveriedAmount" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="DishUnits">
+      <EntityTypeMapping TypeName="IsTypeOf(FastFoodModels.DishUnit)">
+        <MappingFragment StoreEntitySet="DishUnits">
+          <ScalarProperty Name="ID" ColumnName="ID" />
+          <ScalarProperty Name="Unit" ColumnName="Unit" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
     <AssociationSetMapping Name="OrderCustomer" TypeName="FastFoodModels.OrderCustomer" StoreEntitySet="Orders">
       <EndProperty Name="Customer">
         <ScalarProperty Name="ID" ColumnName="Customer_ID" />
@@ -351,11 +487,11 @@
         <ScalarProperty Name="ID" ColumnName="ID" />
       </EndProperty>
     </AssociationSetMapping>
-    <AssociationSetMapping Name="SubOrderDish" TypeName="FastFoodModels.SubOrderDish" StoreEntitySet="Dishes">
-      <EndProperty Name="SubOrder">
-        <ScalarProperty Name="ID" ColumnName="SubOrderDish_Dish_ID" />
-      </EndProperty>
+    <AssociationSetMapping Name="OrderedDishDish" TypeName="FastFoodModels.OrderedDishDish" StoreEntitySet="OrderedDishes">
       <EndProperty Name="Dish">
+        <ScalarProperty Name="ID" ColumnName="OrderedDishDish_OrderedDish_ID" />
+      </EndProperty>
+      <EndProperty Name="OrderedDish">
         <ScalarProperty Name="ID" ColumnName="ID" />
       </EndProperty>
     </AssociationSetMapping>
@@ -378,33 +514,41 @@
     </edmx:Options>
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram Name="FastFoodModels" >
-        <EntityTypeShape EntityType="FastFoodModels.Order" Width="1.5" PointX="0.5" PointY="0.5" Height="1.9700325520833331" />
-        <EntityTypeShape EntityType="FastFoodModels.SubOrder" Width="1.625" PointX="3" PointY="1.125" Height="1.9700325520833339" />
+      <Diagram Name="FastFoodModels" ZoomLevel="82" >
+        <EntityTypeShape EntityType="FastFoodModels.Order" Width="1.5" PointX="0.75" PointY="3.875" Height="1.9700325520833335" />
+        <EntityTypeShape EntityType="FastFoodModels.SubOrder" Width="1.625" PointX="3" PointY="4.25" Height="2.1610522460937496" />
         <AssociationConnector Association="FastFoodModels.OrderSubOrder">
-          <ConnectorPoint PointX="2" PointY="1.7975162760416665" />
-          <ConnectorPoint PointX="3" PointY="1.7975162760416665" />
+          <ConnectorPoint PointX="2.25" PointY="5.0475162760416667" />
+          <ConnectorPoint PointX="3" PointY="5.0475162760416667" />
         </AssociationConnector>
-        <EntityTypeShape EntityType="FastFoodModels.Customer" Width="1.5" PointX="5.125" PointY="0.5" Height="1.3969734700520839" />
+        <EntityTypeShape EntityType="FastFoodModels.Customer" Width="1.5" PointX="3" PointY="1.5" Height="1.5879931640624998" />
         <AssociationConnector Association="FastFoodModels.OrderCustomer">
-          <ConnectorPoint PointX="2" PointY="0.78125" />
-          <ConnectorPoint PointX="5.125" PointY="0.78125" />
+          <ConnectorPoint PointX="1.5" PointY="3.875" />
+          <ConnectorPoint PointX="1.5" PointY="2.29399658203125" />
+          <ConnectorPoint PointX="3" PointY="2.29399658203125" />
         </AssociationConnector>
-        <EntityTypeShape EntityType="FastFoodModels.SideDish" Width="1.5" PointX="0.625" PointY="3.5" Height="1.205953776041667" />
+        <EntityTypeShape EntityType="FastFoodModels.SideDish" Width="1.5" PointX="3" PointY="7.375" Height="1.2059537760416674" />
         <AssociationConnector Association="FastFoodModels.OrderRecipe">
-          <ConnectorPoint PointX="1.3125" PointY="2.4700325520833331" />
-          <ConnectorPoint PointX="1.3125" PointY="3.5" />
+          <ConnectorPoint PointX="1.5" PointY="5.8450325520833335" />
+          <ConnectorPoint PointX="1.5" PointY="7.9779768880208337" />
+          <ConnectorPoint PointX="3" PointY="7.9779768880208337" />
         </AssociationConnector>
-        <EntityTypeShape EntityType="FastFoodModels.SubOrderTemplate" Width="2" PointX="7.375" PointY="0.5" Height="2.16105224609375" />
+        <EntityTypeShape EntityType="FastFoodModels.SubOrderTemplate" Width="2" PointX="5.25" PointY="1.25" Height="2.1610522460937496" />
         <AssociationConnector Association="FastFoodModels.CustomerSubOrderTemplate">
-          <ConnectorPoint PointX="6.625" PointY="1.29399658203125" />
-          <ConnectorPoint PointX="7.375" PointY="1.29399658203125" />
+          <ConnectorPoint PointX="4.5" PointY="2.29399658203125" />
+          <ConnectorPoint PointX="5.25" PointY="2.29399658203125" />
         </AssociationConnector>
-        <EntityTypeShape EntityType="FastFoodModels.Dish" Width="1.5" PointX="3.625" PointY="3.875" Height="1.2059537760416665" />
-        <AssociationConnector Association="FastFoodModels.SubOrderDish">
-          <ConnectorPoint PointX="4.125" PointY="3.28605224609375" />
-          <ConnectorPoint PointX="4.125" PointY="3.875" />
+        <EntityTypeShape EntityType="FastFoodModels.Dish" Width="1.5" PointX="8.25" PointY="4.75" Height="1.2059537760416674" />
+        <EntityTypeShape EntityType="FastFoodModels.OrderedDish" Width="2.125" PointX="5.375" PointY="4.125" Height="2.5430916341145817" />
+        <AssociationConnector Association="FastFoodModels.OrderedDishDish">
+          <ConnectorPoint PointX="7.5" PointY="5.3529768880208337" />
+          <ConnectorPoint PointX="8.25" PointY="5.3529768880208337" />
         </AssociationConnector>
+        <AssociationConnector Association="FastFoodModels.SubOrderOrderedDish">
+          <ConnectorPoint PointX="4.625" PointY="5.3305261230468748" />
+          <ConnectorPoint PointX="5.375" PointY="5.3305261230468748" />
+        </AssociationConnector>
+        <EntityTypeShape EntityType="FastFoodModels.DishUnit" Width="1.5" PointX="7.75" PointY="0.75" Height="1.3969734700520817" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

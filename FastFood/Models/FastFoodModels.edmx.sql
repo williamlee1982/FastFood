@@ -1,6 +1,6 @@
 
 -- --------------------------------------------------
--- Date Created: 03/22/2011 22:27:12
+-- Date Created: 03/22/2011 23:43:09
 -- compatible SQLite
 -- Generated from EDMX file: e:\documents\Visual Studio 2010\Projects\FastFood\FastFood\Models\FastFoodModels.edmx
 -- --------------------------------------------------
@@ -19,6 +19,10 @@
 	DROP TABLE if exists [SubOrderTemplates];
     
 	DROP TABLE if exists [Dishes];
+    
+	DROP TABLE if exists [OrderedDishes];
+    
+	DROP TABLE if exists [DishUnits];
 
 -- --------------------------------------------------
 -- Creating all tables
@@ -81,12 +85,46 @@ CREATE TABLE [SubOrderTemplates] (
 
 -- Creating table 'Dishes'
 CREATE TABLE [Dishes] (
+    [ID] integer PRIMARY KEY AUTOINCREMENT  NOT NULL 
+);
+
+-- Creating table 'OrderedDishes'
+CREATE TABLE [OrderedDishes] (
     [ID] integer PRIMARY KEY AUTOINCREMENT  NOT NULL ,
-    [SubOrderDish_Dish_ID] integer   NOT NULL 
+    [SubOrderID] integer   NOT NULL ,
+    [PreOrderAmount] integer   NOT NULL ,
+    [ActualOrderAmount] integer   NOT NULL ,
+    [DeliveryAmount] integer   NOT NULL ,
+    [DeliveriedAmount] nvarchar(2147483647)   NOT NULL ,
+    [AccountingDeliveriedAmount] nvarchar(2147483647)   NOT NULL ,
+    [OrderedDishDish_OrderedDish_ID] integer   NOT NULL ,
+    [DishUnit_ID] integer   NOT NULL 
 			
-		,CONSTRAINT [FK_SubOrderDish]
-    		FOREIGN KEY ([SubOrderDish_Dish_ID])
+		,CONSTRAINT [FK_OrderedDishDish]
+    		FOREIGN KEY ([OrderedDishDish_OrderedDish_ID])
+    		REFERENCES [Dishes] ([ID])					
+    		
+						
+		,CONSTRAINT [FK_SubOrderOrderedDish]
+    		FOREIGN KEY ([SubOrderID])
     		REFERENCES [SubOrders] ([ID])					
+    		
+						
+		,CONSTRAINT [FK_OrderedDishDishUnit]
+    		FOREIGN KEY ([DishUnit_ID])
+    		REFERENCES [DishUnits] ([ID])					
+    		
+			);
+
+-- Creating table 'DishUnits'
+CREATE TABLE [DishUnits] (
+    [ID] integer PRIMARY KEY AUTOINCREMENT  NOT NULL ,
+    [Unit] nvarchar(2147483647)   NOT NULL ,
+    [Dish_ID] integer   NOT NULL 
+			
+		,CONSTRAINT [FK_DishUnitDish]
+    		FOREIGN KEY ([Dish_ID])
+    		REFERENCES [Dishes] ([ID])					
     		
 			);
 

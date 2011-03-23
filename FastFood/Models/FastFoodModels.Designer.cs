@@ -22,7 +22,8 @@ using System.Runtime.Serialization;
 [assembly: EdmRelationshipAttribute("FastFoodModels", "OrderCustomer", "Order", System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(FastFood.Models.Order), "Customer", System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(FastFood.Models.Customer))]
 [assembly: EdmRelationshipAttribute("FastFoodModels", "OrderRecipe", "Order", System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(FastFood.Models.Order), "Recipe", System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(FastFood.Models.SideDish))]
 [assembly: EdmRelationshipAttribute("FastFoodModels", "CustomerSubOrderTemplate", "Customer", System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(FastFood.Models.Customer), "SubOrderTemplate", System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(FastFood.Models.SubOrderTemplate), true)]
-[assembly: EdmRelationshipAttribute("FastFoodModels", "SubOrderDish", "SubOrder", System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(FastFood.Models.SubOrder), "Dish", System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(FastFood.Models.Dish))]
+[assembly: EdmRelationshipAttribute("FastFoodModels", "OrderedDishDish", "OrderedDish", System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(FastFood.Models.OrderedDish), "Dish", System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(FastFood.Models.Dish))]
+[assembly: EdmRelationshipAttribute("FastFoodModels", "SubOrderOrderedDish", "SubOrder", System.Data.Metadata.Edm.RelationshipMultiplicity.One, typeof(FastFood.Models.SubOrder), "OrderedDish", System.Data.Metadata.Edm.RelationshipMultiplicity.Many, typeof(FastFood.Models.OrderedDish), true)]
 
 #endregion
 
@@ -169,6 +170,38 @@ namespace FastFood.Models
             }
         }
         private ObjectSet<Dish> _Dishes;
+    
+        /// <summary>
+        /// 没有元数据文档可用。
+        /// </summary>
+        public ObjectSet<OrderedDish> OrderedDishes
+        {
+            get
+            {
+                if ((_OrderedDishes == null))
+                {
+                    _OrderedDishes = base.CreateObjectSet<OrderedDish>("OrderedDishes");
+                }
+                return _OrderedDishes;
+            }
+        }
+        private ObjectSet<OrderedDish> _OrderedDishes;
+    
+        /// <summary>
+        /// 没有元数据文档可用。
+        /// </summary>
+        public ObjectSet<DishUnit> DishUnits
+        {
+            get
+            {
+                if ((_DishUnits == null))
+                {
+                    _DishUnits = base.CreateObjectSet<DishUnit>("DishUnits");
+                }
+                return _DishUnits;
+            }
+        }
+        private ObjectSet<DishUnit> _DishUnits;
 
         #endregion
         #region AddTo 方法
@@ -219,6 +252,22 @@ namespace FastFood.Models
         public void AddToDishes(Dish dish)
         {
             base.AddObject("Dishes", dish);
+        }
+    
+        /// <summary>
+        /// 用于向 OrderedDishes EntitySet 添加新对象的方法，已弃用。请考虑改用关联的 ObjectSet&lt;T&gt; 属性的 .Add 方法。
+        /// </summary>
+        public void AddToOrderedDishes(OrderedDish orderedDish)
+        {
+            base.AddObject("OrderedDishes", orderedDish);
+        }
+    
+        /// <summary>
+        /// 用于向 DishUnits EntitySet 添加新对象的方法，已弃用。请考虑改用关联的 ObjectSet&lt;T&gt; 属性的 .Add 方法。
+        /// </summary>
+        public void AddToDishUnits(DishUnit dishUnit)
+        {
+            base.AddObject("DishUnits", dishUnit);
         }
 
         #endregion
@@ -381,6 +430,87 @@ namespace FastFood.Models
         private global::System.Int32 _ID;
         partial void OnIDChanging(global::System.Int32 value);
         partial void OnIDChanged();
+
+        #endregion
+    
+    }
+    
+    /// <summary>
+    /// 每种菜式的不同计量单位
+    /// </summary>
+    [EdmEntityTypeAttribute(NamespaceName="FastFoodModels", Name="DishUnit")]
+    [Serializable()]
+    [DataContractAttribute(IsReference=true)]
+    public partial class DishUnit : EntityObject
+    {
+        #region 工厂方法
+    
+        /// <summary>
+        /// 创建新的 DishUnit 对象。
+        /// </summary>
+        /// <param name="id">ID 属性的初始值。</param>
+        /// <param name="unit">Unit 属性的初始值。</param>
+        public static DishUnit CreateDishUnit(global::System.Int32 id, global::System.String unit)
+        {
+            DishUnit dishUnit = new DishUnit();
+            dishUnit.ID = id;
+            dishUnit.Unit = unit;
+            return dishUnit;
+        }
+
+        #endregion
+        #region 基元属性
+    
+        /// <summary>
+        /// 没有元数据文档可用。
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=true, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.Int32 ID
+        {
+            get
+            {
+                return _ID;
+            }
+            set
+            {
+                if (_ID != value)
+                {
+                    OnIDChanging(value);
+                    ReportPropertyChanging("ID");
+                    _ID = StructuralObject.SetValidValue(value);
+                    ReportPropertyChanged("ID");
+                    OnIDChanged();
+                }
+            }
+        }
+        private global::System.Int32 _ID;
+        partial void OnIDChanging(global::System.Int32 value);
+        partial void OnIDChanged();
+    
+        /// <summary>
+        /// 没有元数据文档可用。
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.String Unit
+        {
+            get
+            {
+                return _Unit;
+            }
+            set
+            {
+                OnUnitChanging(value);
+                ReportPropertyChanging("Unit");
+                _Unit = StructuralObject.SetValidValue(value, false);
+                ReportPropertyChanged("Unit");
+                OnUnitChanged();
+            }
+        }
+        private global::System.String _Unit;
+        partial void OnUnitChanging(global::System.String value);
+        partial void OnUnitChanged();
 
         #endregion
     
@@ -561,6 +691,258 @@ namespace FastFood.Models
                 if ((value != null))
                 {
                     ((IEntityWithRelationships)this).RelationshipManager.InitializeRelatedReference<SideDish>("FastFoodModels.OrderRecipe", "Recipe", value);
+                }
+            }
+        }
+
+        #endregion
+    }
+    
+    /// <summary>
+    /// 分单中所定菜式及数量
+    /// </summary>
+    [EdmEntityTypeAttribute(NamespaceName="FastFoodModels", Name="OrderedDish")]
+    [Serializable()]
+    [DataContractAttribute(IsReference=true)]
+    public partial class OrderedDish : EntityObject
+    {
+        #region 工厂方法
+    
+        /// <summary>
+        /// 创建新的 OrderedDish 对象。
+        /// </summary>
+        /// <param name="id">ID 属性的初始值。</param>
+        /// <param name="subOrderID">SubOrderID 属性的初始值。</param>
+        /// <param name="preOrderAmount">PreOrderAmount 属性的初始值。</param>
+        /// <param name="actualOrderAmount">ActualOrderAmount 属性的初始值。</param>
+        /// <param name="deliveryAmount">DeliveryAmount 属性的初始值。</param>
+        /// <param name="deliveriedAmount">DeliveriedAmount 属性的初始值。</param>
+        /// <param name="accountingDeliveriedAmount">AccountingDeliveriedAmount 属性的初始值。</param>
+        public static OrderedDish CreateOrderedDish(global::System.Int32 id, global::System.Int32 subOrderID, global::System.Int32 preOrderAmount, global::System.Int32 actualOrderAmount, global::System.Int32 deliveryAmount, global::System.String deliveriedAmount, global::System.String accountingDeliveriedAmount)
+        {
+            OrderedDish orderedDish = new OrderedDish();
+            orderedDish.ID = id;
+            orderedDish.SubOrderID = subOrderID;
+            orderedDish.PreOrderAmount = preOrderAmount;
+            orderedDish.ActualOrderAmount = actualOrderAmount;
+            orderedDish.DeliveryAmount = deliveryAmount;
+            orderedDish.DeliveriedAmount = deliveriedAmount;
+            orderedDish.AccountingDeliveriedAmount = accountingDeliveriedAmount;
+            return orderedDish;
+        }
+
+        #endregion
+        #region 基元属性
+    
+        /// <summary>
+        /// 没有元数据文档可用。
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=true, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.Int32 ID
+        {
+            get
+            {
+                return _ID;
+            }
+            set
+            {
+                if (_ID != value)
+                {
+                    OnIDChanging(value);
+                    ReportPropertyChanging("ID");
+                    _ID = StructuralObject.SetValidValue(value);
+                    ReportPropertyChanged("ID");
+                    OnIDChanged();
+                }
+            }
+        }
+        private global::System.Int32 _ID;
+        partial void OnIDChanging(global::System.Int32 value);
+        partial void OnIDChanged();
+    
+        /// <summary>
+        /// 没有元数据文档可用。
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.Int32 SubOrderID
+        {
+            get
+            {
+                return _SubOrderID;
+            }
+            set
+            {
+                OnSubOrderIDChanging(value);
+                ReportPropertyChanging("SubOrderID");
+                _SubOrderID = StructuralObject.SetValidValue(value);
+                ReportPropertyChanged("SubOrderID");
+                OnSubOrderIDChanged();
+            }
+        }
+        private global::System.Int32 _SubOrderID;
+        partial void OnSubOrderIDChanging(global::System.Int32 value);
+        partial void OnSubOrderIDChanged();
+    
+        /// <summary>
+        /// 没有元数据文档可用。
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.Int32 PreOrderAmount
+        {
+            get
+            {
+                return _PreOrderAmount;
+            }
+            set
+            {
+                OnPreOrderAmountChanging(value);
+                ReportPropertyChanging("PreOrderAmount");
+                _PreOrderAmount = StructuralObject.SetValidValue(value);
+                ReportPropertyChanged("PreOrderAmount");
+                OnPreOrderAmountChanged();
+            }
+        }
+        private global::System.Int32 _PreOrderAmount;
+        partial void OnPreOrderAmountChanging(global::System.Int32 value);
+        partial void OnPreOrderAmountChanged();
+    
+        /// <summary>
+        /// 没有元数据文档可用。
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.Int32 ActualOrderAmount
+        {
+            get
+            {
+                return _ActualOrderAmount;
+            }
+            set
+            {
+                OnActualOrderAmountChanging(value);
+                ReportPropertyChanging("ActualOrderAmount");
+                _ActualOrderAmount = StructuralObject.SetValidValue(value);
+                ReportPropertyChanged("ActualOrderAmount");
+                OnActualOrderAmountChanged();
+            }
+        }
+        private global::System.Int32 _ActualOrderAmount;
+        partial void OnActualOrderAmountChanging(global::System.Int32 value);
+        partial void OnActualOrderAmountChanged();
+    
+        /// <summary>
+        /// 没有元数据文档可用。
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.Int32 DeliveryAmount
+        {
+            get
+            {
+                return _DeliveryAmount;
+            }
+            set
+            {
+                OnDeliveryAmountChanging(value);
+                ReportPropertyChanging("DeliveryAmount");
+                _DeliveryAmount = StructuralObject.SetValidValue(value);
+                ReportPropertyChanged("DeliveryAmount");
+                OnDeliveryAmountChanged();
+            }
+        }
+        private global::System.Int32 _DeliveryAmount;
+        partial void OnDeliveryAmountChanging(global::System.Int32 value);
+        partial void OnDeliveryAmountChanged();
+    
+        /// <summary>
+        /// 没有元数据文档可用。
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.String DeliveriedAmount
+        {
+            get
+            {
+                return _DeliveriedAmount;
+            }
+            set
+            {
+                OnDeliveriedAmountChanging(value);
+                ReportPropertyChanging("DeliveriedAmount");
+                _DeliveriedAmount = StructuralObject.SetValidValue(value, false);
+                ReportPropertyChanged("DeliveriedAmount");
+                OnDeliveriedAmountChanged();
+            }
+        }
+        private global::System.String _DeliveriedAmount;
+        partial void OnDeliveriedAmountChanging(global::System.String value);
+        partial void OnDeliveriedAmountChanged();
+    
+        /// <summary>
+        /// 没有元数据文档可用。
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.String AccountingDeliveriedAmount
+        {
+            get
+            {
+                return _AccountingDeliveriedAmount;
+            }
+            set
+            {
+                OnAccountingDeliveriedAmountChanging(value);
+                ReportPropertyChanging("AccountingDeliveriedAmount");
+                _AccountingDeliveriedAmount = StructuralObject.SetValidValue(value, false);
+                ReportPropertyChanged("AccountingDeliveriedAmount");
+                OnAccountingDeliveriedAmountChanged();
+            }
+        }
+        private global::System.String _AccountingDeliveriedAmount;
+        partial void OnAccountingDeliveriedAmountChanging(global::System.String value);
+        partial void OnAccountingDeliveriedAmountChanged();
+
+        #endregion
+    
+        #region 导航属性
+    
+        /// <summary>
+        /// 没有元数据文档可用。
+        /// </summary>
+        [XmlIgnoreAttribute()]
+        [SoapIgnoreAttribute()]
+        [DataMemberAttribute()]
+        [EdmRelationshipNavigationPropertyAttribute("FastFoodModels", "SubOrderOrderedDish", "SubOrder")]
+        public SubOrder SubOrder
+        {
+            get
+            {
+                return ((IEntityWithRelationships)this).RelationshipManager.GetRelatedReference<SubOrder>("FastFoodModels.SubOrderOrderedDish", "SubOrder").Value;
+            }
+            set
+            {
+                ((IEntityWithRelationships)this).RelationshipManager.GetRelatedReference<SubOrder>("FastFoodModels.SubOrderOrderedDish", "SubOrder").Value = value;
+            }
+        }
+        /// <summary>
+        /// 没有元数据文档可用。
+        /// </summary>
+        [BrowsableAttribute(false)]
+        [DataMemberAttribute()]
+        public EntityReference<SubOrder> SubOrderReference
+        {
+            get
+            {
+                return ((IEntityWithRelationships)this).RelationshipManager.GetRelatedReference<SubOrder>("FastFoodModels.SubOrderOrderedDish", "SubOrder");
+            }
+            set
+            {
+                if ((value != null))
+                {
+                    ((IEntityWithRelationships)this).RelationshipManager.InitializeRelatedReference<SubOrder>("FastFoodModels.SubOrderOrderedDish", "SubOrder", value);
                 }
             }
         }
@@ -800,18 +1182,18 @@ namespace FastFood.Models
         [XmlIgnoreAttribute()]
         [SoapIgnoreAttribute()]
         [DataMemberAttribute()]
-        [EdmRelationshipNavigationPropertyAttribute("FastFoodModels", "SubOrderDish", "Dish")]
-        public EntityCollection<Dish> Dishes
+        [EdmRelationshipNavigationPropertyAttribute("FastFoodModels", "SubOrderOrderedDish", "OrderedDish")]
+        public EntityCollection<OrderedDish> OrderedDishes
         {
             get
             {
-                return ((IEntityWithRelationships)this).RelationshipManager.GetRelatedCollection<Dish>("FastFoodModels.SubOrderDish", "Dish");
+                return ((IEntityWithRelationships)this).RelationshipManager.GetRelatedCollection<OrderedDish>("FastFoodModels.SubOrderOrderedDish", "OrderedDish");
             }
             set
             {
                 if ((value != null))
                 {
-                    ((IEntityWithRelationships)this).RelationshipManager.InitializeRelatedCollection<Dish>("FastFoodModels.SubOrderDish", "Dish", value);
+                    ((IEntityWithRelationships)this).RelationshipManager.InitializeRelatedCollection<OrderedDish>("FastFoodModels.SubOrderOrderedDish", "OrderedDish", value);
                 }
             }
         }
